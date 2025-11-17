@@ -13,7 +13,7 @@ fetch(SHEET_URL)
             students[id] = {
                 name: row["Name"],
                 course: row["Course"],
-                duration: row["Duration"],
+                duration: row["Duration (Month)"],
                 issued: row["IssueDate"],
                 certificateNo: row["CertificateNo"],
                 status: row["Status"]
