@@ -61,3 +61,13 @@ function searchStudent() {
         resultBox.classList.remove("hidden");
     }
 }
+// Auto load student details from QR code URL
+window.onload = function () {
+    const urlParams = new URLSearchParams(window.location.search);
+    const certId = urlParams.get("id");
+
+    if (certId) {
+        document.getElementById("searchInput").value = certId;
+        fetchStudentDetails(certId);
+    }
+};
