@@ -1,18 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>CADD Tech Edu — Generate Certificate</title>
-
-  <!-- CSS -->
   <link rel="stylesheet" href="certificate.css" />
 
-  <!-- LOCAL JS LIBRARIES (NO CDN) -->
+  <!-- KEEP ONLY THESE -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="qrcode.min.js"></script>
-  <script src="html2canvas.min.js"></script>
-  <script src="jspdf.umd.min.js"></script>
+
+  <!-- Your code must load LAST -->
+  <script defer src="certificate.js"></script>
 </head>
+
 
 <body>
   <div class="page">
