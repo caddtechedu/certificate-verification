@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>CADD Tech Edu — Generate Certificate</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CADD Tech Edu – Certificate Generator</title>
 
+  <!-- CSS -->
   <link rel="stylesheet" href="certificate.css" />
 
   <!-- Required Libraries -->
@@ -12,40 +13,27 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="qrcode.min.js"></script>
 
-  <!-- Load your certificate.js last -->
+  <!-- Load JS last -->
   <script defer src="certificate.js"></script>
 </head>
 
 <body>
-  <div class="page">
-    <h1>Certificate Generator — CADD Tech Edu</h1>
 
-    <div class="controls">
-      <input id="certInput" placeholder="Enter CertificateNo (e.g. CTE12345)" />
-      <button id="loadBtn">Load</button>
-      <button id="generateBtn" disabled>Generate PDF</button>
-      <small id="status" class="status"></small>
-    </div>
+  <h1>CADD Tech Edu — Certificate Generator</h1>
 
-    <div class="viewer">
-      <canvas id="certCanvas"></canvas>
-    </div>
-
-    <p class="instructions">
-      Enter certificate number and click <b>Load</b>.  
-      Or open this page with <code>?id=CTE12345</code> to auto-load.
-    </p>
+  <div class="controls">
+    <input id="certInput" placeholder="Enter CertificateNo (ex: CTE12345)">
+    <button id="loadBtn">Load Template</button>
+    <button id="generateBtn">Download</button>
+    <p id="status"></p>
   </div>
 
-  <!-- Button event handlers -->
-  <script>
-    document.getElementById("loadBtn").addEventListener("click", () => {
-      generateCertificate();
-    });
+  <canvas id="certCanvas"></canvas>
 
-    document.getElementById("generateBtn").addEventListener("click", () => {
-      downloadCertificate();
-    });
+  <!-- Attach button actions -->
+  <script>
+    document.getElementById("loadBtn").onclick = () => generateCertificate();
+    document.getElementById("generateBtn").onclick = () => downloadCertificate();
   </script>
 
 </body>
