@@ -1,21 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>CADD Tech Edu — Generate Certificate</title>
+
   <link rel="stylesheet" href="certificate.css" />
 
-  <!-- KEEP ONLY THESE -->
+  <!-- Required Libraries -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="qrcode.min.js"></script>
 
-  <!-- Your code must load LAST -->
+  <!-- Load your certificate.js last -->
   <script defer src="certificate.js"></script>
 </head>
-
 
 <body>
   <div class="page">
@@ -29,18 +28,25 @@
     </div>
 
     <div class="viewer">
-      <!-- FIXED: CANVAS SIZE SET HERE -->
-      <canvas id="certCanvas" width="1414" height="2000"></canvas>
+      <canvas id="certCanvas"></canvas>
     </div>
 
     <p class="instructions">
-      Use: enter certificate number and click Load — or open this page with
-      <code>?id=CTE12345</code> to auto-load. Then click <b>Generate PDF</b>.
+      Enter certificate number and click <b>Load</b>.  
+      Or open this page with <code>?id=CTE12345</code> to auto-load.
     </p>
   </div>
 
-  <!-- MAIN SCRIPT -->
-  <script src="certificate.js"></script>
+  <!-- Button event handlers -->
+  <script>
+    document.getElementById("loadBtn").addEventListener("click", () => {
+      generateCertificate();
+    });
+
+    document.getElementById("generateBtn").addEventListener("click", () => {
+      downloadCertificate();
+    });
+  </script>
 
 </body>
 </html>
