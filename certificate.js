@@ -2,85 +2,89 @@
 const SHEET_URL =
   "https://opensheet.elk.sh/1XwenRaqJo7FdOHMZfStaDmi1DFDYB_A5WQz0HGNtdGs/Sheet1";
 
-// Template image
+// Certificate template
 const TEMPLATE = "certificate_template.png";
 
-// Canvas
+// Canvas setup (MUST match 1414×2000)
 const canvas = document.getElementById("certCanvas");
 const ctx = canvas.getContext("2d");
 
-// Load template, student data, photo, QR
+canvas.width = 1414;
+canvas.height = 2000;
+
+// MAIN FUNCTION
 async function generateCertificate() {
   const certNo = document.getElementById("certInput").value.trim();
+
   if (!certNo) {
-    document.getElementById("status").innerText = "Enter Certificate Number!";
+    document.getElementById("status").innerText = "Enter Certificate Number";
     return;
   }
 
   document.getElementById("status").innerText = "Loading student data...";
 
+  // Load Google Sheet
   const res = await fetch(SHEET_URL);
   const data = await res.json();
 
   const student = data.find((s) => s.CertificateNo === certNo);
 
   if (!student) {
-    document.getElementById("status").innerText = "No certificate found!";
+    document.getElementById("status").innerText = "Certificate Not Found!";
     return;
   }
 
-  document.getElementById("status").innerText = "Generating certificate...";
+  document.getElementById("status").innerText = "Generating Certificate...";
 
-  // Load certificate template
+  // LOAD TEMPLATE FIRST
   const template = await loadImage(TEMPLATE);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.drawImage(template, 0, 0, canvas.width, canvas.height);
 
-  // Load photo
+  // LOAD PHOTO (optional)
   let photo = null;
-  if (student.PHOTO) {
-    photo = await loadImage(student.PHOTO).catch(() => null);
+  if (student.PHOTO && student.PHOTO !== "") {
+    try {
+      photo = await loadImage(student.PHOTO);
+    } catch (e) {
+      console.log("Photo failed:", e);
+    }
   }
 
-  // Load QR
-  let qr = null;
+  // LOAD QR (optional)
+  let qrCanvas = null;
   if (student["QR LINK"]) {
-    qr = await generateQR(student["QR LINK"]);
+    qrCanvas = await generateQR(student["QR LINK"]);
   }
 
-  // 🟧 PHOTO ALIGNMENT (Centered in box)
+  // DRAW PHOTO
   if (photo) {
-    ctx.drawImage(photo, 1177, 566, 190, 190);
+    ctx.drawImage(photo, 1177, 566, 183, 226);
   }
 
-  // 🟧 QR CODE ALIGNMENT
-  if (qr) {
-    ctx.drawImage(qr, 1179, 1515, 183, 226);
+  // DRAW QR
+  if (qrCanvas) {
+    ctx.drawImage(qrCanvas, 1179, 1515, 190, 190);
   }
 
-  // TEXT STYLE
+  // TEXT STYLES
   ctx.fillStyle = "#000";
   ctx.font = "40px Arial";
 
-  // 🟧 TEXT POSITIONS (Your exact coordinates)
-  ctx.fillText(student.Course, 849, 781);          // Course
-  ctx.fillText(student.Name, 822, 886);           // Name
-  ctx.fillText(student["Duration (Month)"], 816, 1086); // Duration
-  ctx.fillText(student.StudentID, 787, 1136);      // Student ID
-  ctx.fillText(student.IssueDate, 784, 1223);      // Issue Date
-
-  // Center name (fixed value)
+  // DRAW TEXT
+  ctx.fillText(student.Course, 849, 781);
+  ctx.fillText(student.Name, 822, 886);
   ctx.fillText("CADD TECH EDU", 822, 986);
-
-  // 🟧 CERTIFICATE NUMBER (Right side)
+  ctx.fillText(student["Duration (Month)"], 816, 1086);
+  ctx.fillText(student.StudentID, 787, 1136);
+  ctx.fillText(student.IssueDate, 784, 1223);
   ctx.fillText(student.CertificateNo, 1177, 1754);
 
-  // Download as PNG
-  downloadCertificate(certNo);
-
-  document.getElementById("status").innerText = "Certificate Generated!";
+  document.getElementById("status").innerText =
+    "Certificate Loaded — Click Generate PDF!";
 }
 
-// ========== IMAGE LOADER ==========
+// LOAD IMAGE FUNCTION
 function loadImage(url) {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -91,23 +95,27 @@ function loadImage(url) {
   });
 }
 
-// ========== QR GENERATOR ==========
+// GENERATE QR AS CANVAS
 function generateQR(text) {
   return new Promise((resolve) => {
-    const tempCanvas = document.createElement("canvas");
-    new QRCode(tempCanvas, {
+    const div = document.createElement("div");
+    const qrcode = new QRCode(div, {
       text: text,
       width: 300,
       height: 300,
     });
-    resolve(tempCanvas.querySelector("img"));
+
+    setTimeout(() => {
+      const img = div.querySelector("img");
+      resolve(img);
+    }, 500);
   });
 }
 
-// ========== DOWNLOAD PNG ==========
-function downloadCertificate(certNo) {
+// DOWNLOAD PNG
+function downloadPNG() {
   const link = document.createElement("a");
-  link.download = certNo + ".png";
+  link.download = "certificate.png";
   link.href = canvas.toDataURL("image/png");
   link.click();
 }
