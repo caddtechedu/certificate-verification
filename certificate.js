@@ -7,7 +7,7 @@ const SHEET_URL =
 
 // TEMPLATE - in your environment we downloaded the template to /mnt/data earlier.
 // If you run on GitHub Pages, change this to: const TEMPLATE = "certificate_template.png";
-const TEMPLATE = "/mnt/data/certificate_template.png"; // <-- dev environment path
+const TEMPLATE = "/mnt/data/certificate.png"; // <-- dev environment path
 // const TEMPLATE = "certificate_template.png"; // <-- use this on GitHub Pages
 
 // Canvas setup (must match template pixel size)
