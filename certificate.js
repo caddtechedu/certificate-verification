@@ -23,7 +23,7 @@ canvas.height = 2000;
 const POS = {
   course: { x: 753, y: 772 },
   name:   { x: 780, y: 877 },
-  //center: { x: 822, y: 986 },//
+  center: { x: 822, y: 986 },
   duration: { x: 912, y: 1053 },
   studentId: { x: 864, y: 1104 },
   issueDate: { x: 891, y: 1242 },
