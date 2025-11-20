@@ -5,7 +5,7 @@ const SHEET_URL =
 // Certificate template
 const TEMPLATE = "certificate_template.png";
 
-// Canvas setup (MUST match 1414×2000)
+// Canvas setup
 const canvas = document.getElementById("certCanvas");
 const ctx = canvas.getContext("2d");
 
@@ -34,16 +34,17 @@ async function generateCertificate() {
     return;
   }
 
-  document.getElementById("status").innerText = "Generating Certificate...";
+  document.getElementById("status").innerText = "Loading Template...";
 
-  // LOAD TEMPLATE FIRST
+  // LOAD TEMPLATE FIRST (WAIT COMPLETELY)
   const template = await loadImage(TEMPLATE);
+
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.drawImage(template, 0, 0, canvas.width, canvas.height);
 
   // LOAD PHOTO (optional)
   let photo = null;
-  if (student.PHOTO && student.PHOTO !== "") {
+  if (student.PHOTO) {
     try {
       photo = await loadImage(student.PHOTO);
     } catch (e) {
@@ -67,7 +68,7 @@ async function generateCertificate() {
     ctx.drawImage(qrCanvas, 1179, 1515, 190, 190);
   }
 
-  // TEXT STYLES
+  // TEXT STYLE
   ctx.fillStyle = "#000";
   ctx.font = "40px Arial";
 
@@ -84,38 +85,29 @@ async function generateCertificate() {
     "Certificate Loaded — Click Generate PDF!";
 }
 
-// LOAD IMAGE FUNCTION
+// IMAGE LOADER (IMPORTANT FIX)
 function loadImage(url) {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.crossOrigin = "anonymous";
     img.onload = () => resolve(img);
-    img.onerror = () => reject("Image load error: " + url);
+    img.onerror = () => reject("IMAGE LOAD ERROR: " + url);
     img.src = url;
   });
 }
 
-// GENERATE QR AS CANVAS
+// QR CREATOR
 function generateQR(text) {
   return new Promise((resolve) => {
     const div = document.createElement("div");
-    const qrcode = new QRCode(div, {
+    const q = new QRCode(div, {
       text: text,
       width: 300,
       height: 300,
     });
 
     setTimeout(() => {
-      const img = div.querySelector("img");
-      resolve(img);
+      resolve(div.querySelector("img"));
     }, 500);
   });
-}
-
-// DOWNLOAD PNG
-function downloadPNG() {
-  const link = document.createElement("a");
-  link.download = "certificate.png";
-  link.href = canvas.toDataURL("image/png");
-  link.click();
 }
