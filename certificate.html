@@ -4,14 +4,16 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>CADD Tech Edu — Generate Certificate</title>
+
+  <!-- CSS -->
   <link rel="stylesheet" href="certificate.css" />
-  <!-- jsPDF & html2canvas from CDN -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="qrcode.min.js"></script>
-<script src="html2canvas.min.js"></script>
-<script src="jspdf.umd.min.js"></script>
+
+  <!-- LOCAL JS LIBRARIES (NO CDN) -->
+  <script src="qrcode.min.js"></script>
+  <script src="html2canvas.min.js"></script>
+  <script src="jspdf.umd.min.js"></script>
 </head>
+
 <body>
   <div class="page">
     <h1>Certificate Generator — CADD Tech Edu</h1>
@@ -24,7 +26,8 @@
     </div>
 
     <div class="viewer">
-      <canvas id="certCanvas"></canvas>
+      <!-- FIXED: CANVAS SIZE SET HERE -->
+      <canvas id="certCanvas" width="1414" height="2000"></canvas>
     </div>
 
     <p class="instructions">
@@ -33,9 +36,8 @@
     </p>
   </div>
 
-  <script>
-    // load main script
-  </script>
+  <!-- MAIN SCRIPT -->
   <script src="certificate.js"></script>
+
 </body>
 </html>
