@@ -14,7 +14,8 @@ const SHEET_URL =
   "https://opensheet.elk.sh/1XwenRaqJo7FdOHMZfStaDmi1DFDYB_A5WQz0HGNtdGs/Sheet1";
 
 // TEMPLATE (must match file name in GitHub)
-const TEMPLATE = "certificate.png";
+const TEMPLATE = "https://caddtechedu.github.io/certificate-verification/certificate.png";
+
 
 // CANVAS SETUP
 const canvas = document.getElementById("certCanvas");
