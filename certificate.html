@@ -1,85 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>CADD Tech Edu — Certificate Generator</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CADD Tech Edu – Certificate Generator</title>
 
+  <!-- CSS -->
   <link rel="stylesheet" href="certificate.css" />
 
-  <!-- libraries: prefer local copies in repo (recommended) or CDN -->
-  <!-- If you uploaded the libs to repo root use these local includes: -->
+  <!-- Required Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="qrcode.min.js"></script>
-  <script src="html2canvas.min.js"></script>
-  <script src="jspdf.umd.min.js"></script>
 
-  <!-- If you prefer CDN instead, replace above with CDN versions. -->
-
-  <!-- load main script last -->
+  <!-- Load JS last -->
   <script defer src="certificate.js"></script>
-
-  <style>
-    body { font-family: Arial, sans-serif; background:#fff7f0; padding:24px; color:#222; }
-    .page { max-width: 980px; margin: auto; text-align:center; }
-    .controls { margin: 14px 0; display:flex; gap:10px; justify-content:center; align-items:center; flex-wrap:wrap; }
-    input#certInput { padding:10px; width:300px; border-radius:6px; border:2px solid #ff7a00; }
-    button { padding:10px 14px; background:#ff7a00; color:#fff; border:none; border-radius:6px; cursor:pointer; }
-    #status { display:block; margin-top:12px; color:#555; }
-    .viewer { margin-top:18px; display:flex; justify-content:center; }
-    canvas { border:1px solid #ddd; box-shadow:0 4px 12px rgba(0,0,0,0.06); }
-  </style>
 </head>
+
 <body>
-  <div class="page">
-    <h1>CADD TECH EDU — Certificate Generator</h1>
 
-    <div class="controls">
-      <input id="certInput" placeholder="Enter CertificateNo (e.g. CTE12345)" />
-      <button id="loadBtn">Load</button>
-      <button id="generateBtn" disabled>Generate PDF</button>
-      <button id="downloadPngBtn" disabled>Download PNG</button>
-    </div>
+  <h1>CADD Tech Edu — Certificate Generator</h1>
 
-    <div id="status" style="text-align:center">Status: waiting</div>
-
-    <div class="viewer">
-      <!-- canvas size is set by the script to match the template (1414x2000) -->
-      <canvas id="certCanvas" width="1414" height="2000"></canvas>
-    </div>
-
-    <p style="color:#666;margin-top:14px">Open page with <code>?id=CTE12345</code> to auto-load. Make sure student photo URLs in sheet are direct image links (drive <code>uc?export=download</code> or raw GitHub URLs).</p>
+  <div class="controls">
+    <input id="certInput" placeholder="Enter CertificateNo (ex: CTE12345)">
+    <button id="loadBtn">Load Template</button>
+    <button id="generateBtn">Download</button>
+    <p id="status"></p>
   </div>
 
-  <!-- attach simple handlers (certificate.js also wires things) -->
+  <canvas id="certCanvas"></canvas>
+
+  <!-- Attach button actions -->
   <script>
-    // ensure elements exist before certificate.js runs
-    document.addEventListener('DOMContentLoaded', () => {
-      const loadBtn = document.getElementById('loadBtn');
-      const genBtn = document.getElementById('generateBtn');
-      const dlPng = document.getElementById('downloadPngBtn');
-
-      loadBtn.addEventListener('click', () => {
-        // certificate.js provides generateCertificate()
-        if (typeof generateCertificate === 'function') generateCertificate();
-      });
-
-      genBtn.addEventListener('click', () => {
-        if (typeof generatePDF === 'function') generatePDF();
-      });
-
-      dlPng.addEventListener('click', () => {
-        if (typeof downloadPNG === 'function') downloadPNG();
-      });
-
-      // auto-load via ?id
-      const params = new URLSearchParams(window.location.search);
-      const id = params.get('id');
-      if (id) {
-        const input = document.getElementById('certInput');
-        input.value = id;
-        if (typeof generateCertificate === 'function') generateCertificate();
-      }
-    });
+    document.getElementById("loadBtn").onclick = () => generateCertificate();
+    document.getElementById("generateBtn").onclick = () => downloadCertificate();
   </script>
+
 </body>
 </html>
