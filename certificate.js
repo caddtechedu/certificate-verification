@@ -164,13 +164,19 @@ async function renderCertificate(student) {
     }
 
     // draw photo (cover)
-    if (photoImg) {
-      drawImageCover(photoImg, POS.photo.x, POS.photo.y, POS.photo.w, POS.photo.h);
-    }
+if (photoImg) {
+  ctx.drawImage(photoImg, POS.photo.x, POS.photo.y, POS.photo.w, POS.photo.h);
+} else {
+  console.log("No photo found for student");
+}
 
-    // draw QR
-    if (qrImg) {
-      ctx.drawImage(qrImg, POS.qr.x, POS.qr.y, POS.qr.w, POS.qr.h);
+// draw QR
+if (qrImg) {
+  ctx.drawImage(qrImg, POS.qr.x, POS.qr.y, POS.qr.w, POS.qr.h);
+} else {
+  console.log("No QR found for student");
+}
+
     }
 
     // draw text
@@ -181,8 +187,8 @@ async function renderCertificate(student) {
     ctx.font = "40px Arial";
     ctx.fillText(student.Name || "", POS.name.x, POS.name.y);
     // Center (static)
-    ctx.font = "36px Arial";
-    ctx.fillText("CADD TECH EDU", POS.center.x, POS.center.y);
+    //ctx.font = "36px Arial";
+    ctx.fillText("CADD TECH EDU", POS.center.x, POS.center.y);//
     // Duration
     ctx.font = "34px Arial";
     ctx.fillText(student["Duration (Month)"] || student.Duration || "", POS.duration.x, POS.duration.y);
