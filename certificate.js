@@ -1,10 +1,6 @@
-/* certificate.js - Final Clean Version */
-
-// Google Sheet Source
+// ======== CONFIG ========
 const SHEET_URL = "https://opensheet.elk.sh/1XwenRaqJo7FdOHMZfStaDmi1DFDYB_A5WQz0HGNtdGs/Sheet1";
-
-// Certificate template file in repo root
-const TEMPLATE = "certificate.png";
+const TEMPLATE = "certificate.png"; // Must be in same folder
 
 // Canvas setup
 const canvas = document.getElementById("certCanvas");
@@ -12,7 +8,11 @@ const ctx = canvas.getContext("2d");
 canvas.width = 1414;
 canvas.height = 2000;
 
-// Text and image positions
+// Element Ref
+const inputEl = document.getElementById("certInput");
+const statusEl = document.getElementById("status");
+
+// Coordinates
 const POS = {
   course: { x: 753, y: 772 },
   name: { x: 780, y: 877 },
@@ -24,83 +24,50 @@ const POS = {
   qr: { x: 1140, y: 1443, w: 190, h: 190 }
 };
 
-// UI elements
-const statusEl = document.getElementById("status");
-const input = document.getElementById("certInput");
+// Helper
+function setStatus(msg) { statusEl.innerText = "Status: " + msg; }
 
-function setStatus(text) {
-  statusEl.innerText = text;
-}
-
-// Load image helper
 function loadImage(url) {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.crossOrigin = "anonymous";
     img.onload = () => resolve(img);
-    img.onerror = () => reject("Image Load Failed: " + url);
-    img.src = url + "?v=" + Date.now();
-  });
-}
-
-// QR GENERATOR
-function generateQR(text) {
-  return new Promise((resolve, reject) => {
-    try {
-      const div = document.createElement("div");
-      div.style.position = "absolute";
-      div.style.left = "-9999px";
-      document.body.appendChild(div);
-
-      new QRCode(div, { text, width: 300, height: 300 });
-
-      setTimeout(() => {
-        const img = div.querySelector("img");
-        if (img) {
-          resolve(img);
-        } else {
-          reject("QR Creation Failed");
-        }
-        document.body.removeChild(div);
-      }, 250);
-    } catch (e) {
-      reject(e);
-    }
+    img.onerror = () => reject("Image load failed");
+    img.src = url;
   });
 }
 
 // Render Certificate
 async function renderCertificate(student) {
   try {
-    setStatus("Loading Template...");
-    const template = await loadImage(TEMPLATE);
+    setStatus("Rendering...");
 
+    const template = await loadImage(TEMPLATE);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(template, 0, 0, canvas.width, canvas.height);
 
-    setStatus("Loading Photo...");
-
-    let photoImg = null;
-    if (student.PHOTO && student.PHOTO.trim()) {
-      try {
-        photoImg = await loadImage(student.PHOTO.trim());
-      } catch (e) {
-        console.warn("Photo failed");
-      }
+    // ---- Student Photo ----
+    if (student.PHOTO && student.PHOTO.trim() !== "") {
+      let img = await loadImage(student.PHOTO.trim());
+      ctx.drawImage(img, POS.photo.x, POS.photo.y, POS.photo.w, POS.photo.h);
     }
 
-    setStatus("Generating QR...");
-    const qrValue = student["QR LINK"] && student["QR LINK"].trim()
-      ? student["QR LINK"].trim()
-      : `https://caddtechedu.github.io/certificate-verification/?id=${student.CertificateNo}`;
+    // ---- QR ----
+    const qrValue = student["QR LINK"];
+    if (qrValue) {
+      const container = document.createElement("div");
+      const qr = new QRCode(container, {
+        text: qrValue,
+        width: POS.qr.w,
+        height: POS.qr.h
+      });
+      await new Promise(r => setTimeout(r, 400));
+      const qrImg = container.querySelector("img");
+      if (qrImg) ctx.drawImage(qrImg, POS.qr.x, POS.qr.y, POS.qr.w, POS.qr.h);
+    }
 
-    const qrImg = await generateQR(qrValue);
-
-    if (photoImg) ctx.drawImage(photoImg, POS.photo.x, POS.photo.y, POS.photo.w, POS.photo.h);
-    ctx.drawImage(qrImg, POS.qr.x, POS.qr.y, POS.qr.w, POS.qr.h);
-
-    ctx.fillStyle = "#000";
-    ctx.font = "38px Arial";
+    // ---- TEXT ----
+    ctx.font = "42px Arial"; ctx.fillStyle = "#000";
     ctx.fillText(student.Course, POS.course.x, POS.course.y);
     ctx.fillText(student.Name, POS.name.x, POS.name.y);
     ctx.fillText(student["Duration (Month)"], POS.duration.x, POS.duration.y);
@@ -108,45 +75,34 @@ async function renderCertificate(student) {
     ctx.fillText(student.IssueDate, POS.issueDate.x, POS.issueDate.y);
     ctx.fillText(student.CertificateNo, POS.certificateNo.x, POS.certificateNo.y);
 
-    setStatus("Certificate Ready ✔");
-  } catch (err) {
-    console.error(err);
-    setStatus("Render failed: " + err);
+    setStatus("Rendered");
+  } catch (e) {
+    console.log(e);
+    setStatus("Render failed");
   }
 }
 
-// MAIN GENERATOR
+// Button Action
 async function generateCertificate() {
-  const id = input.value.trim();
-  if (!id) return setStatus("Enter Certificate No!");
+  const id = inputEl.value.trim();
+  if (!id) return setStatus("Enter Certificate No");
 
-  setStatus("Fetching Data...");
-
+  setStatus("Loading Sheet Data...");
   const res = await fetch(SHEET_URL);
   const rows = await res.json();
+  const student = rows.find(r => r.CertificateNo === id || r.StudentID === id);
 
-  const student = rows.find(
-    r => r.CertificateNo === id || r.StudentID === id
-  );
-
-  if (!student) return setStatus("No record found!");
-
+  if (!student) return setStatus("Record Not Found");
   renderCertificate(student);
 }
 
-// DOWNLOADS
-window.downloadPNG = function () {
+function downloadPNG() {
   const link = document.createElement("a");
   link.download = "certificate.png";
-  link.href = canvas.toDataURL();
+  link.href = canvas.toDataURL("image/png");
   link.click();
-};
+}
 
-window.generatePDF = function () {
-  const { jsPDF } = window.jspdf;
-  const pdf = new jsPDF({ orientation: "portrait", unit: "px", format: [1414, 2000] });
-  pdf.addImage(canvas.toDataURL("image/png"), "PNG", 0, 0, 1414, 2000);
-  pdf.save("certificate.pdf");
-};
-
+// Expose to HTML
 window.generateCertificate = generateCertificate;
+window.downloadPNG = downloadPNG;
