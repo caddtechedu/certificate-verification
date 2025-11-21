@@ -1,16 +1,20 @@
-/* Certificate Generator - Full Working Version */
+/* ============================================
+   CADD TECH EDU - Certificate Generator
+   Fully Working Version with:
+   Template Render / Text / Photo / QR / PNG
+   ============================================ */
 
-// ---------------- CONFIG ----------------
+// -------- CONFIG --------
 const SHEET_URL = "https://opensheet.elk.sh/1XwenRaqJo7FdOHMZfStaDmi1DFDYB_A5WQz0HGNtdGs/Sheet1";
 const TEMPLATE = "certificate.png";
 
-// Canvas setup
+// Canvas
 const canvas = document.getElementById("certCanvas");
 const ctx = canvas.getContext("2d");
 canvas.width = 1414;
 canvas.height = 2000;
 
-// Position configuration
+// Position Map
 const POS = {
   course: { x: 753, y: 772 },
   name: { x: 780, y: 877 },
@@ -24,18 +28,18 @@ const POS = {
 
 let currentStudent = null;
 
-// Status message update
+// Status update
 function setStatus(msg) {
   document.getElementById("status").innerText = "Status: " + msg;
 }
 
-// Generic image loader
+// Image loader
 function loadImage(url) {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.crossOrigin = "anonymous";
     img.onload = () => resolve(img);
-    img.onerror = () => reject(new Error("Image Load Failed: " + url));
+    img.onerror = () => reject(new Error("Image failed: " + url));
     img.src = url + "?v=" + Date.now();
   });
 }
@@ -48,93 +52,91 @@ function generateQR(text, w, h) {
     container.style.left = "-9999px";
     document.body.appendChild(container);
 
-    new QRCode(container, {
-      text: text,
-      width: w,
-      height: h,
-      correctLevel: QRCode.CorrectLevel.H
-    });
+    new QRCode(container, { text, width: w, height: h });
 
     setTimeout(() => {
       const img = container.querySelector("img");
-      if (!img) {
+      if (!img) { reject("QR generation failed"); return; }
+
+      const qrImg = new Image();
+      qrImg.onload = () => {
         document.body.removeChild(container);
-        reject("QR not generated");
-      } else {
-        const qrImg = new Image();
-        qrImg.onload = () => {
-          document.body.removeChild(container);
-          resolve(qrImg);
-        };
-        qrImg.src = img.src;
-      }
+        resolve(qrImg);
+      };
+      qrImg.src = img.src;
     }, 350);
   });
 }
 
-// Draw Image Cover
+// Draw Center Crop Photo
 function drawImageCover(img, x, y, w, h) {
   const imgRatio = img.width / img.height;
   const boxRatio = w / h;
   let newW, newH, offsetX = 0, offsetY = 0;
 
   if (imgRatio > boxRatio) {
-    newH = h;
-    newW = imgRatio * h;
+    newH = h; newW = imgRatio * h;
     offsetX = -((newW - w) / 2);
   } else {
-    newW = w;
-    newH = w / imgRatio;
+    newW = w; newH = w / imgRatio;
     offsetY = -((newH - h) / 2);
   }
 
   ctx.drawImage(img, x + offsetX, y + offsetY, newW, newH);
 }
 
-// Render Certificate
+// Main Render Function
 async function renderCertificate(student) {
   try {
     setStatus("Rendering certificate...");
 
+    // Safe text values
+    const course = (student.Course || "").toString();
+    const name = (student.Name || "").toString();
+    const duration = (student["Duration (Month)"] || "").toString();
+    const studentId = (student.StudentID || "").toString();
+    const issueDate = (student.IssueDate || "").toString();
+    const certNo = (student.CertificateNo || "").toString();
+    const qrUrl = (student["QR LINK"] || "").toString();
+    const photoUrl = (student.PHOTO || "").toString();
+
+    // Draw template
     const template = await loadImage(TEMPLATE);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(template, 0, 0, canvas.width, canvas.height);
 
-    // ----- Load Photo -----
-    let photoImg = null;
-    if (student.PHOTO && student.PHOTO.trim() !== "") {
+    // Draw Photo
+    if (photoUrl) {
       try {
-        photoImg = await loadImage(student.PHOTO);
+        const photoImg = await loadImage(photoUrl);
         drawImageCover(photoImg, POS.photo.x, POS.photo.y, POS.photo.w, POS.photo.h);
-      } catch (e) { console.warn("Photo load failed"); }
+      } catch (err) { console.warn("PHOTO NOT LOADED"); }
     }
 
-    // ----- Load QR -----
-    let qrValue = student["QR LINK"] || "";
-    if (qrValue) {
-      const qrImg = await generateQR(qrValue, POS.qr.w, POS.qr.h);
+    // Draw QR
+    if (qrUrl) {
+      const qrImg = await generateQR(qrUrl, POS.qr.w, POS.qr.h);
       ctx.drawImage(qrImg, POS.qr.x, POS.qr.y, POS.qr.w, POS.qr.h);
     }
 
-    // ----- Text Rendering -----
+    // Draw Text
     ctx.fillStyle = "#000";
     ctx.font = "42px Arial";
+    ctx.fillText(course, POS.course.x, POS.course.y);
+    ctx.fillText(name, POS.name.x, POS.name.y);
+    ctx.fillText(duration, POS.duration.x, POS.duration.y);
+    ctx.fillText(studentId, POS.studentId.x, POS.studentId.y);
+    ctx.fillText(issueDate, POS.issueDate.x, POS.issueDate.y);
+    ctx.fillText(certNo, POS.certificateNo.x, POS.certificateNo.y);
 
-    ctx.fillText(student.Course, POS.course.x, POS.course.y);
-    ctx.fillText(student.Name, POS.name.x, POS.name.y);
-    ctx.fillText(student["Duration (Month)"], POS.duration.x, POS.duration.y);
-    ctx.fillText(student.StudentID, POS.studentId.x, POS.studentId.y);
-    ctx.fillText(student.IssueDate, POS.issueDate.x, POS.issueDate.y);
-    ctx.fillText(student.CertificateNo, POS.certificateNo.x, POS.certificateNo.y);
-
-    setStatus("Rendered Successfully");
+    setStatus("Rendered Successfully ✔");
   } catch (err) {
     console.error(err);
-    setStatus("Render Failed: " + err.message);
+    setStatus("Render failed: " + err.message);
   }
 }
 
-// Main Certificate Generator
+// Load & generate certificate
 async function generateCertificate() {
   const id = document.getElementById("certInput").value.trim();
   if (!id) return setStatus("Enter Certificate No");
@@ -146,31 +148,31 @@ async function generateCertificate() {
     const rows = await res.json();
 
     const student = rows.find(r =>
-      (r.CertificateNo || "").trim() === id ||
-      (r.StudentID || "").trim() === id
+      (r.CertificateNo || "").toString().trim() === id ||
+      (r.StudentID || "").toString().trim() === id
     );
 
-    if (!student) return setStatus("No Record Found");
+    if (!student) return setStatus("No record found");
 
     currentStudent = student;
-
-    console.log("Student Loaded →", student);
-    await renderCertificate(student);
+    console.log("Loaded:", student);
+    renderCertificate(student);
 
   } catch (err) {
     console.error(err);
-    setStatus("Error: " + err.message);
+    setStatus("Error loading sheet");
   }
 }
 
-// Download PNG
+// PNG Download
 function downloadPNG() {
-  const name = currentStudent.CertificateNo || "certificate";
+  const file = currentStudent.CertificateNo || "certificate";
   const a = document.createElement("a");
-  a.download = name + ".png";
+  a.download = file + ".png";
   a.href = canvas.toDataURL();
   a.click();
 }
 
+// Expose to HTML
 window.generateCertificate = generateCertificate;
 window.downloadPNG = downloadPNG;
