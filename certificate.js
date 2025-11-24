@@ -78,12 +78,15 @@ async function renderCertificate(student) {
     }
 
     // QR
-    if (student["QR LINK"]) {
-      try {
-        const qrImg = await generateQRImage(student["QR LINK"]);
-        ctx.drawImage(qrImg, POS.qr.x, POS.qr.y, POS.qr.w, POS.qr.h);
-      } catch (e) { console.warn("QR error:", e); }
-    }
+if (student["QR LINK"]) {
+  try {
+    const qrImg = await generateQRImage(student["QR LINK"]);
+    ctx.drawImage(qrImg, POS.qr.x, POS.qr.y, POS.qr.w, POS.qr.h);
+  } catch (e) { 
+    console.warn("QR error:", e); 
+  }
+}
+
 
     // Text
     ctx.fillStyle = "#000";
