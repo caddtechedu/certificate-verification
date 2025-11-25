@@ -124,9 +124,8 @@ async function renderCertificate(student) {
     // Load QR
     let qrImg = null;
     try {
-      const qrLink =
-        student["QR LINK"] ||
-        `https://caddtechedu.github.io/certificate-verification/?id=${student.CertificateNo}`;
+      const qrLink = `https://caddtechedu.github.io/certificate-verification/?id=${student.CertificateNo}`;
+
       qrImg = await generateQRImage(qrLink);
       ctx.drawImage(qrImg, POS.qr.x, POS.qr.y, POS.qr.w, POS.qr.h);
     } catch (err) {
